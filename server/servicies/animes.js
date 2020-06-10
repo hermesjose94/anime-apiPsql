@@ -8,31 +8,42 @@ class AnimesService {
   //---------------- CRUD ANIME
 
   async getAnimes() {
-    const animes = await this.conexion.query(`select * from animes`);
-    animes.rows.sort(function (a, b) {
-      var nameA = a.name.toUpperCase(); // ignore upper and lowercase
-      var nameB = b.name.toUpperCase(); // ignore upper and lowercase
-      if (nameA < nameB) {
-        return -1;
-      }
-      if (nameA > nameB) {
-        return 1;
-      }
-      return 0;
-    });
+    const animes = await this.conexion.query(
+      `select * from animes order by name asc`
+    );
     return Promise.resolve(animes.rows);
   }
 
-  async getAnime({ animeId }) {
+  async getAnimesOnline(estatus) {
+    const animes = await this.conexion.query(
+      `select * from animes 
+      where status = $1 
+      order by name asc`,
+      [estatus]
+    );
+
+    let week = {};
+    animes.rows.forEach((anime) => {
+      if (!week.hasOwnProperty(anime.premiere)) {
+        week[anime.premiere] = [];
+      }
+      week[anime.premiere].push(anime);
+    });
+
+    return Promise.resolve(week);
+  }
+
+  async getAnimeUser(animeId, userId) {
     const anime = await this.conexion.query(
       `select * from animes where id = $1`,
       [animeId]
     );
 
     const follows = await this.conexion.query(
-      `select * from "userAnimes" where users_id = 1 and animes_id = $1`,
-      [animeId]
+      `select * from "userAnimes" where users_id = $1 and animes_id = $2`,
+      [userId, animeId]
     );
+
     let follow = false;
     let episode = 0;
     if (follows.rows.length > 0) {
@@ -44,6 +55,23 @@ class AnimesService {
       follow: {
         status: follow,
         episode: episode,
+      },
+    };
+
+    return Promise.resolve(json);
+  }
+
+  async getAnime({ animeId }) {
+    const anime = await this.conexion.query(
+      `select * from animes where id = $1`,
+      [animeId]
+    );
+
+    const json = {
+      anime: anime.rows[0],
+      follow: {
+        status: false,
+        episode: 0,
       },
     };
 

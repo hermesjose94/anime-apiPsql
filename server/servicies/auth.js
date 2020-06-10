@@ -28,6 +28,7 @@ class AuthService {
       name: user.name,
       username: user.username,
       email: user.email,
+      admin: user.admin,
     };
   }
 

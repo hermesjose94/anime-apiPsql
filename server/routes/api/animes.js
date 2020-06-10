@@ -26,6 +26,19 @@ router.get("/", async function (req, res, next) {
   }
 });
 
+router.get("/online", async function (req, res, next) {
+  try {
+    const animes = await animesService.getAnimesOnline("Online");
+
+    res.status(200).json({
+      animes: animes,
+      message: "Animes Online Listed",
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.get("/follow/:userId", async function (req, res, next) {
   const { userId } = req.params;
   try {
@@ -50,6 +63,21 @@ router.get("/:animeId", async function (req, res, next) {
     res.status(200).json({
       data: anime,
       message: "Anime Retrived",
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/:animeId/:userId", async function (req, res, next) {
+  const { animeId, userId } = req.params;
+
+  try {
+    const anime = await animesService.getAnimeUser(animeId, userId);
+
+    res.status(200).json({
+      data: anime,
+      message: "Anime User Retrived",
     });
   } catch (error) {
     next(error);
