@@ -59,6 +59,8 @@ class AuthService {
 
   async verifyToken(body, query) {
     // check header or url parameters or post parameters for token
+    // console.log("body=>", body);
+
     var token = body.token || query.token;
 
     if (!token) {
